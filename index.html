@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASCII Camera Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 2rem 1rem 1.5rem;
+            background: rgba(15, 15, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            text-align: center;
+            color: #fff;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        header p {
+            text-align: center;
+            color: #888;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 400;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            max-width: 1600px;
+            width: 100%;
+            /* margin: 0 auto; */
+        }
+
+        .sidebar {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .panel {
+            background: rgba(20, 20, 28, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.25rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .control-item {
+            margin-bottom: 1.25rem;
+        }
+
+        .control-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: #bbb;
+        }
+
+        .control-value {
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.05);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            border: none;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            cursor: pointer;
+            outline: none;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 7px;
+        }
+
+        input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 7px;
+        }
+
+        .color-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .color-input-wrapper {
+            flex: 1;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        button {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            width: 100%;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.primary {
+            background: #fff;
+            color: #0a0a0f;
+        }
+
+        button.primary:hover {
+            background: #f0f0f0;
+        }
+
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #ascii-container {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            overflow: auto;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #ascii {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre;
+            font-size: 7px;
+            line-height: 0.8;
+            text-align: center;
+            color: #00ff00;
+            transform: scaleX(-1);;
+        }
+
+        video {
+            display: none;
+        }
+
+        footer {
+            padding: 1rem;
+            text-align: center;
+            background: rgba(10, 10, 15, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .status {
+            padding: 0.75rem 1rem;
+            text-align: center;
+            color: #999;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .status.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+        }
+
+        .preset-colors {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .preset-color {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-color:hover {
+            transform: scale(1.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .preset-color.active {
+            border-color: #fff;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ASCII Camera Studio</h1>
+        <p>Real-time camera to ASCII art converter</p>
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-title">Display</div>
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Font Size</span>
+                        <span class="control-value" id="fontsize-value">7px</span>
+                    </div>
+                    <input type="range" id="fontsize" min="4" max="16" step="1" value="7">
+                </div>
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Line Height</span>
+                        <span class="control-value" id="lineheight-value">0.8</span>
+                    </div>
+                    <input type="range" id="lineheight" min="0.5" max="1.5" step="0.05" value="0.8">
+                </div>
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Resolution</span>
+                        <span class="control-value" id="resolution-value">400</span>
+                    </div>
+                    <input type="range" id="resolution" min="200" max="600" step="50" value="400">
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Image Adjustment</div>
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Brightness</span>
+                        <span class="control-value" id="brightness-value">1.5</span>
+                    </div>
+                    <input type="range" id="brightness" min="0.5" max="3" step="0.1" value="1.5">
+                </div>
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Contrast</span>
+                        <span class="control-value" id="contrast-value">1.0</span>
+                    </div>
+                    <input type="range" id="contrast" min="0.5" max="2" step="0.1" value="1.0">
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Color</div>
+                <div class="control-item">
+                    <div class="color-row">
+                        <div class="color-preview" id="color-preview"></div>
+                        <div class="color-input-wrapper">
+                            <input type="color" id="ascii-color" value="#00ff00">
+                        </div>
+                    </div>
+                    <div class="preset-colors">
+                        <div class="preset-color active" style="background: #00ff00;" data-color="#00ff00" title="Matrix Green"></div>
+                        <div class="preset-color" style="background: #00ffff;" data-color="#00ffff" title="Cyan"></div>
+                        <div class="preset-color" style="background: #ffb000;" data-color="#ffb000" title="Amber"></div>
+                        <div class="preset-color" style="background: #ffffff;" data-color="#ffffff" title="White"></div>
+                        <div class="preset-color" style="background: #d946ef;" data-color="#d946ef" title="Purple"></div>
+                        <div class="preset-color" style="background: #ff4444;" data-color="#ff4444" title="Red"></div>
+                        <div class="preset-color" style="background: #00ff88;" data-color="#00ff88" title="Mint"></div>
+                        <div class="preset-color" style="background: #ffd700;" data-color="#ffd700" title="Gold"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Actions</div>
+                <div class="button-group">
+                    <button id="snapshot" class="primary">Take Snapshot</button>
+                    <button id="reset">Reset All Settings</button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="canvas-area">
+            <div id="status" class="status"></div>
+            <div id="ascii-container">
+                <pre id="ascii"></pre>
+            </div>
+        </div>
+
+        <video id="video" autoplay playsinline></video>
+    </main>
+
+    <footer>
+        &copy; 2025 Aryan | AryCodes
+    </footer>
+
+    <script>
+        const video = document.getElementById('video');
+        const ascii = document.getElementById('ascii');
+        const asciiContainer = document.getElementById('ascii-container');
+        const statusDiv = document.getElementById('status');
+        const colorPreview = document.getElementById('color-preview');
+        
+        const brightnessInput = document.getElementById('brightness');
+        const contrastInput = document.getElementById('contrast');
+        const fontsizeInput = document.getElementById('fontsize');
+        const resolutionInput = document.getElementById('resolution');
+        const lineheightInput = document.getElementById('lineheight');
+        const asciiColorInput = document.getElementById('ascii-color');
+        
+        const brightnessValue = document.getElementById('brightness-value');
+        const contrastValue = document.getElementById('contrast-value');
+        const fontsizeValue = document.getElementById('fontsize-value');
+        const resolutionValue = document.getElementById('resolution-value');
+        const lineheightValue = document.getElementById('lineheight-value');
+        
+        const resetBtn = document.getElementById('reset');
+        const snapshotBtn = document.getElementById('snapshot');
+        const presetColors = document.querySelectorAll('.preset-color');
+
+        const chars = " `.-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5YxjSQP6k9aVW#G&BU8@$KMXdpg%E4bA0W2Hh";
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let brightness = 1.5;
+        let contrast = 1.0;
+        let resolution = 400;
+        let currentColor = '#00ff00';
+        let isRunning = false;
+
+        // Update color preview
+        function updateColorPreview(color) {
+            colorPreview.style.background = color;
+            ascii.style.color = color;
+            currentColor = color;
+        }
+
+        updateColorPreview(currentColor);
+
+        // Show loading status
+        statusDiv.innerHTML = '<div class="loading"><div class="spinner"></div> Requesting camera access...</div>';
+        statusDiv.classList.add('loading');
+
+        // Initialize camera
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'user',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        })
+        .then(stream => {
+            video.srcObject = stream;
+            statusDiv.textContent = 'Camera ready';
+            statusDiv.classList.remove('loading');
+            setTimeout(() => statusDiv.style.display = 'none', 2000);
+        })
+        .catch(err => {
+            statusDiv.textContent = 'Camera access denied. Please enable camera permissions.';
+            statusDiv.classList.remove('loading');
+        });
+
+        // Event listeners for controls
+        brightnessInput.addEventListener('input', (e) => {
+            brightness = parseFloat(e.target.value);
+            brightnessValue.textContent = brightness.toFixed(1);
+        });
+
+        contrastInput.addEventListener('input', (e) => {
+            contrast = parseFloat(e.target.value);
+            contrastValue.textContent = contrast.toFixed(1);
+        });
+
+        fontsizeInput.addEventListener('input', (e) => {
+            const size = e.target.value;
+            ascii.style.fontSize = size + 'px';
+            fontsizeValue.textContent = size + 'px';
+        });
+
+        resolutionInput.addEventListener('input', (e) => {
+            resolution = parseInt(e.target.value);
+            resolutionValue.textContent = resolution;
+        });
+
+        lineheightInput.addEventListener('input', (e) => {
+            const lineHeight = e.target.value;
+            ascii.style.lineHeight = lineHeight;
+            lineheightValue.textContent = lineHeight;
+        });
+
+        asciiColorInput.addEventListener('input', (e) => {
+            updateColorPreview(e.target.value);
+            presetColors.forEach(p => p.classList.remove('active'));
+        });
+
+        presetColors.forEach(preset => {
+            preset.addEventListener('click', () => {
+                const color = preset.getAttribute('data-color');
+                asciiColorInput.value = color;
+                updateColorPreview(color);
+                presetColors.forEach(p => p.classList.remove('active'));
+                preset.classList.add('active');
+            });
+        });
+
+        resetBtn.addEventListener('click', () => {
+            brightnessInput.value = 1.5;
+            contrastInput.value = 1.0;
+            fontsizeInput.value = 7;
+            resolutionInput.value = 400;
+            lineheightInput.value = 0.8;
+            asciiColorInput.value = '#00ff00';
+            
+            brightness = 1.5;
+            contrast = 1.0;
+            resolution = 400;
+            
+            brightnessValue.textContent = '1.5';
+            contrastValue.textContent = '1.0';
+            fontsizeValue.textContent = '7px';
+            resolutionValue.textContent = '400';
+            lineheightValue.textContent = '0.8';
+            
+            ascii.style.fontSize = '7px';
+            ascii.style.lineHeight = '0.8';
+            updateColorPreview('#00ff00');
+            
+            presetColors.forEach(p => p.classList.remove('active'));
+            presetColors[0].classList.add('active');
+            
+            statusDiv.textContent = 'Settings reset';
+            statusDiv.style.display = 'block';
+            setTimeout(() => statusDiv.style.display = 'none', 2000);
+        });
+
+        snapshotBtn.addEventListener('click', () => {
+            const snapshot = ascii.textContent;
+            const blob = new Blob([snapshot], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ascii-snapshot-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            statusDiv.textContent = 'Snapshot saved';
+            statusDiv.style.display = 'block';
+            setTimeout(() => statusDiv.style.display = 'none', 2000);
+        });
+
+        function applyContrast(value, contrastFactor) {
+            return ((value / 255 - 0.5) * contrastFactor + 0.5) * 255;
+        }
+
+        function frame() {
+            if (!video.videoWidth) {
+                requestAnimationFrame(frame);
+                return;
+            }
+
+            const width = resolution;
+            const height = Math.floor(width * video.videoHeight / video.videoWidth / 2);
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(video, 0, 0, width, height);
+            const data = ctx.getImageData(0, 0, width, height).data;
+
+            let output = '';
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const i = (y * width + x) * 4;
+                    let avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
+                    avg = applyContrast(avg, contrast);
+                    avg = Math.min(255, Math.max(0, avg * brightness));
+                    const charIndex = Math.floor((avg / 255) * (chars.length - 1));
+                    output += chars[charIndex];
+                }
+                output += '\n';
+            }
+            ascii.textContent = output;
+            requestAnimationFrame(frame);
+        }
+
+        video.addEventListener('play', () => {
+            if (!isRunning) {
+                isRunning = true;
+                requestAnimationFrame(frame);
+            }
+        });
+    </script>
+</body>
+</html>
