@@ -56,4 +56,4 @@ A real-time webcam to ASCII art converter built with HTML, CSS, and JavaScript.
 ## Contact
 
 Created by Aryan Mishra | AryCodes
-Contact: [arycodes.in@gmail.com](mailto:arycodes.in@gmail.com)
+Contact: [arycodes.in@gmail.com](mailto:arycodes.in@gmail.com).
